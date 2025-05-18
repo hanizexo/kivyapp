@@ -1,4 +1,4 @@
-name: Build Kivy APK with Mirrors
+name: Build Kivy APK with Updated Dependencies
 
 on:
   workflow_dispatch:
@@ -17,9 +17,9 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y python3-pip build-essential zip unzip openjdk-17-jdk \
-          libncurses5 libstdc++6 zlib1g-dev libffi-dev libssl-dev git
-        pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
-        pip install cython buildozer -i https://pypi.tuna.tsinghua.edu.cn/simple
+          libncurses6 libstdc++6 zlib1g-dev libffi-dev libssl-dev git
+        pip install --upgrade pip
+        pip install cython buildozer
 
     - name: Build APK
       run: |
