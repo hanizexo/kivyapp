@@ -37,10 +37,13 @@ jobs:
         echo "List latest/bin folder content:"
         ls -l latest/bin
 
+    - name: Check sdkmanager presence
+      run: |
+        ls -l $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager
+
     - name: Install Android Build-tools and Platform
       run: |
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-        yes | sdkmanager --install "build-tools;30.0.3" "platforms;android-30"
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "build-tools;30.0.3" "platforms;android-30"
 
     - name: Build APK
       working-directory: ./apps
