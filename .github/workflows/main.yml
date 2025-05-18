@@ -23,19 +23,21 @@ jobs:
         pip install --upgrade pip
         pip install cython buildozer
 
-    - name: Download and setup Android Command Line Tools with debug
+    - name: Download and setup Android Command Line Tools with fixed structure
       run: |
         rm -rf $HOME/android-sdk/cmdline-tools/latest
         mkdir -p $HOME/android-sdk
         cd $HOME/android-sdk
         curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip commandlinetools.zip
-        echo "List cmdline-tools folder content:"
-        ls -l cmdline-tools
         rm commandlinetools.zip
-        mv cmdline-tools latest
+
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
+        rm -rf cmdline-tools/cmdline-tools
+
         echo "List latest/bin folder content:"
-        ls -l latest/bin
+        ls -l cmdline-tools/latest/bin
 
     - name: Check sdkmanager presence
       run: |
