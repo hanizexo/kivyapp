@@ -23,7 +23,7 @@ jobs:
         pip install --upgrade pip
         pip install cython buildozer
 
-    - name: Download and setup Android Command Line Tools with fixed structure
+    - name: Download and setup Android Command Line Tools with conditional move
       run: |
         rm -rf $HOME/android-sdk/cmdline-tools/latest
         mkdir -p $HOME/android-sdk
@@ -32,9 +32,16 @@ jobs:
         unzip commandlinetools.zip
         rm commandlinetools.zip
 
-        mkdir -p cmdline-tools/latest
-        mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
-        rm -rf cmdline-tools/cmdline-tools
+        echo "Contents of cmdline-tools folder:"
+        ls -l cmdline-tools
+
+        if [ -d cmdline-tools/cmdline-tools ]; then
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
+          rm -rf cmdline-tools/cmdline-tools
+        else
+          mv cmdline-tools cmdline-tools/latest
+        fi
 
         echo "List latest/bin folder content:"
         ls -l cmdline-tools/latest/bin
