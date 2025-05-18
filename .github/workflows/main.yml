@@ -1,55 +1,44 @@
-name: Build APK
-
-on:
-  push:
-    branches: [ main ]
-
+name: Build Kivy Android APK
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
     steps:
       - uses: actions/checkout@v4
 
-      - name: نصب وابستگی‌های سیستمی
+      - name: Install build dependencies
         run: |
-          sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
-                              autoconf libtool pkg-config zlib1g-dev \
-                              libncurses5-dev libncursesw5-dev libtinfo6 \
-                              cmake libffi-dev libssl-dev
+          sudo apt-get update
+          sudo apt-get install -y build-essential autoconf automake libtool pkg-config \
+              libffi-dev libssl-dev zlib1g-dev \
+              git zip unzip libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+              openjdk-17-jdk python3-pip
+          pip3 install --user Cython buildozer
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: نصب Buildozer و Cython
+      - name: Set up Android SDK
         run: |
-          pip3 install --upgrade --user buildozer cython==0.29.33
-
-      - name: Setup Android SDK command-line tools
-        run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          wget -qO cmdlinetools.zip \
-            https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip cmdlinetools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" ]; then
-            mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools \
-               $ANDROID_SDK_ROOT/cmdline-tools/latest
-          else
-            mv $ANDROID_SDK_ROOT/cmdline-tools \
-               $ANDROID_SDK_ROOT/cmdline-tools/latest
-          fi
-
-      - name: نصب Android SDK platforms و build-tools
-        run: |
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/
+          echo "Listing sdkmanager location:"
+          ls $ANDROID_SDK_ROOT/cmdline-tools/latest/bin
+          echo "sdkmanager version:"
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --version
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            --sdk_root=$ANDROID_SDK_ROOT "platform-tools" \
-            "platforms;android-30" "build-tools;30.0.3"
+              --sdk_root=$ANDROID_SDK_ROOT \
+              "build-tools;30.0.3" "platforms;android-30"
 
-      - name: ساخت اپلیکیشن با Buildozer
-        run: |
-          cd apps
-          yes | buildozer android debug
+      - name: Build Android (Kivy)
+        working-directory: apps
+        run: buildozer android debug --verbose
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: APK
+          name: app-debug
           path: apps/bin/*.apk
