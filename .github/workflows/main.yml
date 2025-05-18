@@ -1,17 +1,19 @@
-name: Build Kivy APK with Updated Dependencies
+name: Build Kivy APK with Build-tools fix
 
 on:
-  workflow_dispatch:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Install dependencies
       run: |
@@ -20,6 +22,10 @@ jobs:
           libncurses6 libstdc++6 zlib1g-dev libffi-dev libssl-dev git
         pip install --upgrade pip
         pip install cython buildozer
+
+    - name: Install Android Build-tools 30.0.3
+      run: |
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "build-tools;30.0.3"
 
     - name: Build APK
       working-directory: ./apps
