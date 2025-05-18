@@ -22,6 +22,7 @@ jobs:
         pip install cython buildozer
 
     - name: Build APK
+      working-directory: ./apps
       run: |
         buildozer android debug --verbose
 
@@ -29,4 +30,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: kivy-apk
-        path: bin/*.apk
+        path: apps/bin/*.apk
